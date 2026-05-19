@@ -1,16 +1,39 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import React from 'react';
-import { useColorScheme } from 'react-native';
+import './global.css'
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold, useFonts } from '@expo-google-fonts/nunito'
+import { Stack } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+import { ActivityIndicator, View } from 'react-native'
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Nunito_400Regular,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+  })
+
+  if (!fontsLoaded) {
+    return (
+      <View className="flex-1 items-center justify-center bg-rose-subtle">
+        <ActivityIndicator color="#F43F8E" />
+      </View>
+    )
+  }
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
-  );
+    <>
+      <StatusBar style="dark" />
+      <Stack>
+        <Stack.Screen
+          name="index"
+          options={{
+            title: 'Detalhes',
+            headerTintColor: '#F43F8E',
+            headerStyle: { backgroundColor: '#FFF0F6' },
+            headerBackTitle: 'Voltar',
+          }}
+        />
+      </Stack>
+    </>
+  )
 }

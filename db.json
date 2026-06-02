@@ -1,0 +1,16 @@
+{
+  "places": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Museu Histórico Municipal",
+      "description": "Museu dedicado à preservação da história local, contendo documentos, fotografias e exposições permanentes sobre a região.",
+      "category": "museum",
+      "radiusMeters": 200,
+      "imageUrl": "https://example.com/images/museum.jpg",
+      "isActive": true,
+      "latitude": -28.6775,
+      "longitude": -49.3697,
+      "createdAt": "2026-06-01T10:30:00.000Z"
+    }
+  ]
+}

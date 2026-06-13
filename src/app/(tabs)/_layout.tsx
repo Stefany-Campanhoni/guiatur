@@ -2,6 +2,7 @@ import AntDesign from '@expo/vector-icons/AntDesign'
 import Entypo from '@expo/vector-icons/Entypo'
 import { Redirect, Tabs } from 'expo-router'
 
+import { COLORS } from '@/constants/theme'
 import { useLocationPermission } from '@/contexts/location-permission'
 
 export default function TabsLayout() {
@@ -14,13 +15,13 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: '#FDF0F5' },
-        headerTintColor: '#C47A97',
+        headerStyle: { backgroundColor: COLORS.roseSubtle },
+        headerTintColor: COLORS.roseDark,
         headerTitleStyle: { fontFamily: 'Nunito_700Bold' },
-        tabBarActiveTintColor: '#C47A97',
-        tabBarInactiveTintColor: '#A890A0',
+        tabBarActiveTintColor: COLORS.roseDark,
+        tabBarInactiveTintColor: COLORS.inkMuted,
         tabBarLabelStyle: { fontFamily: 'Nunito_600SemiBold' },
-        tabBarStyle: { backgroundColor: '#FAF4EC', borderTopColor: '#E8D8C4' },
+        tabBarStyle: { backgroundColor: COLORS.sandLight, borderTopColor: COLORS.sand },
       }}
     >
       <Tabs.Screen

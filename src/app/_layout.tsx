@@ -5,6 +5,7 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { ActivityIndicator, View } from 'react-native'
 
+import { COLORS } from '@/constants/theme'
 import { LocationPermissionProvider } from '@/contexts/location-permission'
 
 export default function RootLayout() {
@@ -17,7 +18,7 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return (
       <View className="flex-1 items-center justify-center bg-rose-subtle">
-        <ActivityIndicator color="#C47A97" />
+        <ActivityIndicator color={COLORS.roseDark} />
       </View>
     )
   }
@@ -28,10 +29,10 @@ export default function RootLayout() {
       <LocationPermissionProvider>
         <Stack
           screenOptions={{
-            headerStyle: { backgroundColor: '#FDF0F5' },
-            headerTintColor: '#C47A97',
+            headerStyle: { backgroundColor: COLORS.roseSubtle },
+            headerTintColor: COLORS.roseDark,
             headerTitleStyle: { fontFamily: 'Nunito_700Bold' },
-            contentStyle: { backgroundColor: '#FDF0F5' },
+            contentStyle: { backgroundColor: COLORS.roseSubtle },
           }}
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

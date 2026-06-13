@@ -6,11 +6,59 @@
       "description": "Museu dedicado à preservação da história local, contendo documentos, fotografias e exposições permanentes sobre a região.",
       "category": "museum",
       "radiusMeters": 200,
-      "imageUrl": "https://example.com/images/museum.jpg",
+      "imageUrl": "https://picsum.photos/seed/guiatur-museu/400/300",
       "isActive": true,
       "latitude": -28.6775,
       "longitude": -49.3697,
       "createdAt": "2026-06-01T10:30:00.000Z"
+    },
+    {
+      "id": "7b2d1f64-2c3a-4e5b-9f10-1a2b3c4d5e6f",
+      "name": "Catedral São José",
+      "description": "Principal templo católico da cidade, com arquitetura imponente e vitrais que marcam o centro histórico e recebem visitantes durante todo o ano.",
+      "category": "religious",
+      "radiusMeters": 150,
+      "imageUrl": "https://picsum.photos/seed/guiatur-catedral/400/300",
+      "isActive": true,
+      "latitude": -28.6772,
+      "longitude": -49.3705,
+      "createdAt": "2026-06-02T09:00:00.000Z"
+    },
+    {
+      "id": "9c3e2a75-3d4b-4f6c-8a21-2b3c4d5e6f70",
+      "name": "Praça Nereu Ramos",
+      "description": "Praça central arborizada, ponto de encontro tradicional da população, cercada por cafés, bancos e eventos culturais ao ar livre.",
+      "category": "park",
+      "radiusMeters": 250,
+      "imageUrl": "https://picsum.photos/seed/guiatur-praca/400/300",
+      "isActive": true,
+      "latitude": -28.6759,
+      "longitude": -49.3692,
+      "createdAt": "2026-06-03T14:20:00.000Z"
+    },
+    {
+      "id": "a1f4b386-4e5c-4071-9b32-3c4d5e6f7081",
+      "name": "Monumento ao Imigrante",
+      "description": "Monumento que homenageia os imigrantes italianos e poloneses que colonizaram a região, símbolo da identidade cultural local.",
+      "category": "monument",
+      "radiusMeters": 100,
+      "imageUrl": "https://picsum.photos/seed/guiatur-monumento/400/300",
+      "isActive": true,
+      "latitude": -28.6801,
+      "longitude": -49.3720,
+      "createdAt": "2026-06-04T11:45:00.000Z"
+    },
+    {
+      "id": "b2059497-5f6d-4182-8c43-4d5e6f708192",
+      "name": "Casa da Cultura",
+      "description": "Centro cultural que abriga exposições de arte, apresentações teatrais e oficinas, promovendo a produção artística da comunidade local.",
+      "category": "cultural",
+      "radiusMeters": 180,
+      "imageUrl": "https://picsum.photos/seed/guiatur-cultura/400/300",
+      "isActive": true,
+      "latitude": -28.6745,
+      "longitude": -49.3738,
+      "createdAt": "2026-06-05T16:10:00.000Z"
     }
   ]
 }

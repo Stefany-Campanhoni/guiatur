@@ -8,13 +8,15 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "server": "json-server --host 0.0.0.0 --port 3001 db.json"
   },
   "dependencies": {
     "@expo-google-fonts/nunito": "^0.4.2",
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "^2.9.10",
     "@react-navigation/native": "^7.1.33",
+    "axios": "^1.17.0",
     "expo": "~55.0.24",
     "expo-constants": "~55.0.16",
     "expo-device": "~55.0.17",

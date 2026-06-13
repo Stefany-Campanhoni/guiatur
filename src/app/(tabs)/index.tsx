@@ -1,12 +1,17 @@
+import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
+import { ProximityModal } from '@/components/ProximityModal'
 import { COLORS } from '@/constants/theme'
+import { useLiveLocation } from '@/contexts/location'
+import { useGeofencing } from '@/hooks/useGeofencing'
 import { fetchPlaces } from '@/services/jsonServer'
 import { CATEGORY_LABELS, placeToMapPoint, type MapPoint } from '@/types/place'
+import { haversineDistance } from '@/utils/haversine'
 
 const INITIAL_REGION = {
   latitude: -28.6775,
@@ -16,6 +21,8 @@ const INITIAL_REGION = {
 }
 
 export default function MapScreen() {
+  const router = useRouter()
+  const { coords } = useLiveLocation()
   const [points, setPoints] = useState<MapPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -37,6 +44,8 @@ export default function MapScreen() {
     loadPlaces()
   }, [loadPlaces])
 
+  const { nearbyPoint, dismiss } = useGeofencing(points, coords)
+
   if (isLoading) {
     return <LoadingOverlay message="Carregando mapa..." />
   }
@@ -46,10 +55,11 @@ export default function MapScreen() {
   }
 
   const activePoints = points.filter((point) => point.isActive)
+  const nearbyDistance = nearbyPoint && coords ? haversineDistance(coords, nearbyPoint) : null
 
   return (
     <View style={styles.container}>
-      <MapView provider={PROVIDER_GOOGLE} style={styles.map} initialRegion={INITIAL_REGION}>
+      <MapView provider={PROVIDER_GOOGLE} style={styles.map} initialRegion={INITIAL_REGION} showsUserLocation>
         {activePoints.map((point) => (
           <Marker
             key={`marker-${point.id}`}
@@ -69,6 +79,16 @@ export default function MapScreen() {
           />
         ))}
       </MapView>
+
+      <ProximityModal
+        point={nearbyPoint}
+        distanceMeters={nearbyDistance}
+        onDismiss={dismiss}
+        onSeeDetails={(point) => {
+          dismiss()
+          router.push({ pathname: '/place/[id]', params: { id: point.id, source: point.source } })
+        }}
+      />
     </View>
   )
 }

@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useFocusEffect, useRouter } from 'expo-router'
+import { useCallback, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
@@ -26,9 +26,10 @@ export default function MapScreen() {
   const [points, setPoints] = useState<MapPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const hasLoaded = useRef(false)
 
-  const loadPlaces = useCallback(async () => {
-    setIsLoading(true)
+  const loadPlaces = useCallback(async (withSpinner: boolean) => {
+    if (withSpinner) setIsLoading(true)
     setError(null)
     try {
       const places = await fetchPlaces()
@@ -36,13 +37,16 @@ export default function MapScreen() {
     } catch {
       setError('Não foi possível carregar os pontos.')
     } finally {
-      setIsLoading(false)
+      if (withSpinner) setIsLoading(false)
     }
   }, [])
 
-  useEffect(() => {
-    loadPlaces()
-  }, [loadPlaces])
+  useFocusEffect(
+    useCallback(() => {
+      loadPlaces(!hasLoaded.current)
+      hasLoaded.current = true
+    }, [loadPlaces]),
+  )
 
   const { nearbyPoint, dismiss } = useGeofencing(points, coords)
 
@@ -51,7 +55,7 @@ export default function MapScreen() {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={loadPlaces} />
+    return <ErrorMessage message={error} onRetry={() => loadPlaces(true)} />
   }
 
   const activePoints = points.filter((point) => point.isActive)

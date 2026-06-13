@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useFocusEffect, useRouter } from 'expo-router'
+import { useCallback, useRef, useState } from 'react'
 import { FlatList, Text, View } from 'react-native'
 
 import { ErrorMessage } from '@/components/ErrorMessage'
@@ -16,9 +16,10 @@ export default function ExploreScreen() {
   const [points, setPoints] = useState<MapPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const hasLoaded = useRef(false)
 
-  const loadPlaces = useCallback(async () => {
-    setIsLoading(true)
+  const loadPlaces = useCallback(async (withSpinner: boolean) => {
+    if (withSpinner) setIsLoading(true)
     setError(null)
     try {
       const places = await fetchPlaces()
@@ -26,20 +27,23 @@ export default function ExploreScreen() {
     } catch {
       setError('Não foi possível carregar os pontos. Verifique se o servidor está rodando.')
     } finally {
-      setIsLoading(false)
+      if (withSpinner) setIsLoading(false)
     }
   }, [])
 
-  useEffect(() => {
-    loadPlaces()
-  }, [loadPlaces])
+  useFocusEffect(
+    useCallback(() => {
+      loadPlaces(!hasLoaded.current)
+      hasLoaded.current = true
+    }, [loadPlaces]),
+  )
 
   if (isLoading) {
     return <LoadingOverlay message="Carregando pontos..." />
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={loadPlaces} />
+    return <ErrorMessage message={error} onRetry={() => loadPlaces(true)} />
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
@@ -20,29 +20,29 @@ export default function MapScreen() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let isMounted = true
-    fetchPlaces()
-      .then((places) => {
-        if (isMounted) setPoints(places.map(placeToMapPoint))
-      })
-      .catch(() => {
-        if (isMounted) setError('Não foi possível carregar os pontos.')
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false)
-      })
-    return () => {
-      isMounted = false
+  const loadPlaces = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const places = await fetchPlaces()
+      setPoints(places.map(placeToMapPoint))
+    } catch {
+      setError('Não foi possível carregar os pontos.')
+    } finally {
+      setIsLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    loadPlaces()
+  }, [loadPlaces])
 
   if (isLoading) {
     return <LoadingOverlay message="Carregando mapa..." />
   }
 
   if (error) {
-    return <ErrorMessage message={error} />
+    return <ErrorMessage message={error} onRetry={loadPlaces} />
   }
 
   const activePoints = points.filter((point) => point.isActive)

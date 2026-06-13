@@ -13,7 +13,9 @@ export function useGeofencing(points: MapPoint[], coords: Coords | null) {
   const triggeredIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
-    if (!coords) {
+    // Don't replace a modal that's still showing; surface the next point only
+    // after the current one is dismissed.
+    if (!coords || nearbyPoint) {
       return
     }
     const entered = findNewlyEnteredPoint(points, coords, triggeredIds.current)
@@ -21,7 +23,7 @@ export function useGeofencing(points: MapPoint[], coords: Coords | null) {
       triggeredIds.current.add(entered.id)
       setNearbyPoint(entered)
     }
-  }, [points, coords])
+  }, [points, coords, nearbyPoint])
 
   const dismiss = useCallback(() => setNearbyPoint(null), [])
 

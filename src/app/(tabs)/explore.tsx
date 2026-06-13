@@ -5,11 +5,14 @@ import { FlatList, Text, View } from 'react-native'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { PointCard } from '@/components/PointCard'
+import { useLiveLocation } from '@/contexts/location'
 import { fetchPlaces } from '@/services/jsonServer'
 import { placeToMapPoint, type MapPoint } from '@/types/place'
+import { haversineDistance } from '@/utils/haversine'
 
 export default function ExploreScreen() {
   const router = useRouter()
+  const { coords } = useLiveLocation()
   const [points, setPoints] = useState<MapPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -56,6 +59,7 @@ export default function ExploreScreen() {
         renderItem={({ item }) => (
           <PointCard
             point={item}
+            distanceMeters={coords ? haversineDistance(coords, item) : null}
             onPress={() => router.push({ pathname: '/place/[id]', params: { id: item.id, source: item.source } })}
           />
         )}

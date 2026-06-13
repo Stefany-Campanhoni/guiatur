@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar'
 import { ActivityIndicator, View } from 'react-native'
 
 import { COLORS } from '@/constants/theme'
+import { LiveLocationProvider } from '@/contexts/location'
 import { LocationPermissionProvider } from '@/contexts/location-permission'
 
 export default function RootLayout() {
@@ -27,18 +28,20 @@ export default function RootLayout() {
     <>
       <StatusBar style="dark" />
       <LocationPermissionProvider>
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: COLORS.roseSubtle },
-            headerTintColor: COLORS.roseDark,
-            headerTitleStyle: { fontFamily: 'Nunito_700Bold' },
-            contentStyle: { backgroundColor: COLORS.roseSubtle },
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="permissions" options={{ headerShown: false }} />
-          <Stack.Screen name="place/[id]" options={{ title: 'Detalhes' }} />
-        </Stack>
+        <LiveLocationProvider>
+          <Stack
+            screenOptions={{
+              headerStyle: { backgroundColor: COLORS.roseSubtle },
+              headerTintColor: COLORS.roseDark,
+              headerTitleStyle: { fontFamily: 'Nunito_700Bold' },
+              contentStyle: { backgroundColor: COLORS.roseSubtle },
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="permissions" options={{ headerShown: false }} />
+            <Stack.Screen name="place/[id]" options={{ title: 'Detalhes' }} />
+          </Stack>
+        </LiveLocationProvider>
       </LocationPermissionProvider>
     </>
   )

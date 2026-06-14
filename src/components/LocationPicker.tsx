@@ -5,7 +5,7 @@ import { COLORS } from '@/constants/theme'
 import type { Coords } from '@/contexts/location'
 import { haversineDistance } from '@/utils/haversine'
 
-const MAX_DISTANCE_METERS = 10
+const MAX_DISTANCE_METERS = 30
 
 function clampToRadius(origin: Coords, target: Coords): Coords {
   const distance = haversineDistance(origin, target)
@@ -55,7 +55,7 @@ export function LocationPicker({ label, origin, value, onChange, onInteractStart
         <MapView
           provider={PROVIDER_GOOGLE}
           style={{ flex: 1 }}
-          initialRegion={{ latitude: origin.latitude, longitude: origin.longitude, latitudeDelta: 0.0004, longitudeDelta: 0.0004 }}
+          initialRegion={{ latitude: origin.latitude, longitude: origin.longitude, latitudeDelta: 0.001, longitudeDelta: 0.001 }}
           rotateEnabled={false}
           pitchEnabled={false}
           onPress={(event) => onChange(clampToRadius(origin, event.nativeEvent.coordinate))}

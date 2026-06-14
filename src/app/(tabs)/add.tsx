@@ -18,6 +18,7 @@ const DEFAULT_VALUES: PlaceFormValues = {
   category: 'museum',
   radiusMeters: '',
   imageUrl: '',
+  pinColor: '#E8A0B4',
   isActive: true,
 }
 

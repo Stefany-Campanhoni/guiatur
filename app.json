@@ -49,6 +49,13 @@
         "react-native-maps",
         {}
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O GuiaTur precisa acessar suas fotos para escolher uma imagem do ponto.",
+          "cameraPermission": "O GuiaTur precisa acessar a câmera para tirar uma foto do ponto."
+        }
+      ],
       "expo-font",
       "expo-image"
     ],

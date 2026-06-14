@@ -14,6 +14,8 @@ type GooglePlace = {
   editorialSummary?: { text?: string }
 }
 
+const PLACES_FIELD_MASK = 'places.id,places.displayName,places.location,places.photos,places.rating'
+
 export function googlePhotoUrl(photoName: string): string {
   return `${GOOGLE_PLACES_BASE_URL}/${photoName}/media?maxWidthPx=600&key=${GOOGLE_MAPS_API_KEY}`
 }
@@ -24,7 +26,9 @@ function toMapPoint(place: GooglePlace): MapPoint {
     source: PlaceSource.Google,
     name: place.displayName?.text ?? 'Ponto turístico',
     category: null,
+    customCategory: null,
     imageUrl: place.photos?.[0] ? googlePhotoUrl(place.photos[0].name) : null,
+    pinColor: null,
     latitude: place.location.latitude,
     longitude: place.location.longitude,
     radiusMeters: 0,
@@ -44,9 +48,27 @@ export async function fetchNearbyGooglePlaces(center: LatLng): Promise<MapPoint[
         maxResultCount: 15,
         locationRestriction: { circle: { center, radius: 5000 } },
       },
+      { headers: { 'X-Goog-FieldMask': PLACES_FIELD_MASK } },
+    )
+    return (data.places ?? []).map(toMapPoint)
+  } catch {
+    return []
+  }
+}
+
+export async function searchGooglePlaces(query: string, center: LatLng): Promise<MapPoint[]> {
+  if (!GOOGLE_MAPS_API_KEY || !query.trim()) {
+    return []
+  }
+  try {
+    const { data } = await googleApiClient.post<{ places?: GooglePlace[] }>(
+      '/places:searchText',
       {
-        headers: { 'X-Goog-FieldMask': 'places.id,places.displayName,places.location,places.photos,places.rating' },
+        textQuery: query,
+        maxResultCount: 15,
+        locationBias: { circle: { center, radius: 20000 } },
       },
+      { headers: { 'X-Goog-FieldMask': PLACES_FIELD_MASK } },
     )
     return (data.places ?? []).map(toMapPoint)
   } catch {

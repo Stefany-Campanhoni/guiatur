@@ -20,8 +20,6 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
@@ -49,11 +47,17 @@
       ],
       [
         "react-native-maps",
+        {}
+      ],
+      [
+        "expo-image-picker",
         {
-          "androidGoogleMapsApiKey": "process.env.GOOGLE_MAPS_API_KEY"
+          "photosPermission": "O GuiaTur precisa acessar suas fotos para escolher uma imagem do ponto.",
+          "cameraPermission": "O GuiaTur precisa acessar a câmera para tirar uma foto do ponto."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

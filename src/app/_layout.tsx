@@ -6,11 +6,42 @@ import Entypo from '@expo/vector-icons/Entypo'
 import { Tabs } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { ActivityIndicator, View } from 'react-native'
-import { LocationPermissionProvider } from '../contexts/location-permission'
 
-const tabIcons = {
-  welcome: require('../../assets/images/tabIcons/home.png'),
-  content: require('../../assets/images/tabIcons/explore.png'),
+import { COLORS } from '@/constants/theme'
+import { LiveLocationProvider } from '@/contexts/location'
+import { LocationPermissionProvider, useLocationPermission } from '@/contexts/location-permission'
+
+function RootTabs() {
+  const { isGranted } = useLocationPermission()
+
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: COLORS.roseDark,
+        tabBarInactiveTintColor: COLORS.inkMuted,
+        tabBarLabelStyle: { fontFamily: 'Nunito_600SemiBold' },
+        tabBarStyle: { backgroundColor: COLORS.sandLight, borderTopColor: COLORS.sand },
+      }}
+    >
+      <Tabs.Screen name="permissions" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+      <Tabs.Protected guard={isGranted}>
+        <Tabs.Screen
+          name="index"
+          options={{ title: 'Mapa', tabBarIcon: ({ color, size }) => <Entypo name="map" size={size} color={color} /> }}
+        />
+        <Tabs.Screen
+          name="explore"
+          options={{ title: 'Explorar', tabBarIcon: ({ color, size }) => <Entypo name="compass" size={size} color={color} /> }}
+        />
+        <Tabs.Screen
+          name="add"
+          options={{ title: 'Adicionar', tabBarIcon: ({ color, size }) => <AntDesign name="plus-circle" size={size} color={color} /> }}
+        />
+        <Tabs.Screen name="place/[id]" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+      </Tabs.Protected>
+    </Tabs>
+  )
 }
 
 export default function RootLayout() {
@@ -23,7 +54,7 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return (
       <View className="flex-1 items-center justify-center bg-rose-subtle">
-        <ActivityIndicator color="#C47A97" />
+        <ActivityIndicator color={COLORS.roseDark} />
       </View>
     )
   }
@@ -32,37 +63,9 @@ export default function RootLayout() {
     <>
       <StatusBar style="dark" />
       <LocationPermissionProvider>
-        <Tabs
-          screenOptions={{
-            headerStyle: { backgroundColor: '#FDF0F5' },
-            headerTintColor: '#C47A97',
-            headerTitleStyle: { fontFamily: 'Nunito_700Bold' },
-            tabBarActiveTintColor: '#C47A97',
-            tabBarInactiveTintColor: '#A890A0',
-            tabBarLabelStyle: { fontFamily: 'Nunito_600SemiBold' },
-            tabBarStyle: {
-              backgroundColor: '#FAF4EC',
-              borderTopColor: '#E8D8C4',
-            },
-          }}
-        >
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: 'Welcome',
-              tabBarLabel: 'Home',
-              tabBarIcon: ({ color, size }) => <AntDesign name="home" size={size} color={color} />,
-            }}
-          />
-          <Tabs.Screen
-            name="content"
-            options={{
-              title: 'GuiaTur',
-              tabBarLabel: 'Content',
-              tabBarIcon: ({ color, size }) => <Entypo name="map" size={size} color={color} />,
-            }}
-          />
-        </Tabs>
+        <LiveLocationProvider>
+          <RootTabs />
+        </LiveLocationProvider>
       </LocationPermissionProvider>
     </>
   )

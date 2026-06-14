@@ -24,9 +24,11 @@ type LocationPickerProps = {
   origin: Coords | null
   value: Coords | null
   onChange: (coords: Coords) => void
+  onInteractStart?: () => void
+  onInteractEnd?: () => void
 }
 
-export function LocationPicker({ label, origin, value, onChange }: LocationPickerProps) {
+export function LocationPicker({ label, origin, value, onChange, onInteractStart, onInteractEnd }: LocationPickerProps) {
   if (!origin || !value) {
     return (
       <View className="mb-4">
@@ -42,15 +44,18 @@ export function LocationPicker({ label, origin, value, onChange }: LocationPicke
     <View className="mb-4">
       <Text className="mb-1 font-medium text-sm text-ink">{label}</Text>
       <Text className="mb-2 font-sans text-xs text-ink-muted">
-        Toque ou arraste o pino (até {MAX_DISTANCE_METERS} m da sua localização).
+        Dê zoom, toque ou arraste o pino (até {MAX_DISTANCE_METERS} m da sua localização).
       </Text>
-      <View style={{ height: 200, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.sand }}>
+      <View
+        style={{ height: 240, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.sand }}
+        onTouchStart={onInteractStart}
+        onTouchEnd={onInteractEnd}
+        onTouchCancel={onInteractEnd}
+      >
         <MapView
           provider={PROVIDER_GOOGLE}
           style={{ flex: 1 }}
-          initialRegion={{ latitude: origin.latitude, longitude: origin.longitude, latitudeDelta: 0.0008, longitudeDelta: 0.0008 }}
-          scrollEnabled={false}
-          zoomEnabled={false}
+          initialRegion={{ latitude: origin.latitude, longitude: origin.longitude, latitudeDelta: 0.0004, longitudeDelta: 0.0004 }}
           rotateEnabled={false}
           pitchEnabled={false}
           onPress={(event) => onChange(clampToRadius(origin, event.nativeEvent.coordinate))}

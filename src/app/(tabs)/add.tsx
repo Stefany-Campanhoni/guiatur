@@ -46,6 +46,7 @@ export default function AddScreen() {
   const category = watch('category')
   const [origin, setOrigin] = useState<Coords | null>(null)
   const [pinCoord, setPinCoord] = useState<Coords | null>(null)
+  const [scrollEnabled, setScrollEnabled] = useState(true)
 
   useEffect(() => {
     if (coords && !origin) {
@@ -90,6 +91,7 @@ export default function AddScreen() {
       className="flex-1 bg-rose-subtle"
       contentContainerStyle={{ padding: 24, paddingTop: insets.top + 16 }}
       keyboardShouldPersistTaps="handled"
+      scrollEnabled={scrollEnabled}
     >
       <Text className="mb-1 font-bold text-2xl text-rose-dark">Adicionar ponto</Text>
       <Text className="mb-5 font-sans text-sm text-ink-muted">Ajuste o pino no mapa para definir o local do ponto.</Text>
@@ -175,7 +177,14 @@ export default function AddScreen() {
         )}
       />
 
-      <LocationPicker label="Localização do ponto" origin={origin} value={pinCoord} onChange={setPinCoord} />
+      <LocationPicker
+        label="Localização do ponto"
+        origin={origin}
+        value={pinCoord}
+        onChange={setPinCoord}
+        onInteractStart={() => setScrollEnabled(false)}
+        onInteractEnd={() => setScrollEnabled(true)}
+      />
 
       <Controller
         control={control}

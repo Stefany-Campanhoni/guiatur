@@ -24,7 +24,10 @@ export type Place = {
   createdAt: string
 }
 
-export type PlaceSource = 'local' | 'google'
+export enum PlaceSource {
+  Local = 'local',
+  Google = 'google',
+}
 
 /** Unified shape consumed by the map and list, regardless of source. */
 export type MapPoint = {
@@ -42,7 +45,7 @@ export type MapPoint = {
 export function placeToMapPoint(place: Place): MapPoint {
   return {
     id: place.id,
-    source: 'local',
+    source: PlaceSource.Local,
     name: place.name,
     category: place.category,
     imageUrl: place.imageUrl,

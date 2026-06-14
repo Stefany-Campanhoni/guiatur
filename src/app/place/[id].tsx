@@ -11,7 +11,7 @@ import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { useLiveLocation } from '@/contexts/location'
 import { fetchPlace } from '@/services/jsonServer'
 import { fetchGooglePlaceDetails } from '@/services/placesApi'
-import { type PlaceCategory } from '@/types/place'
+import { PlaceSource, type PlaceCategory } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
 
 type DetailView = {
@@ -35,7 +35,7 @@ export default function PlaceDetailsScreen() {
     setIsLoading(true)
     setError(null)
     try {
-      if (source === 'google') {
+      if (source === PlaceSource.Google) {
         const place = await fetchGooglePlaceDetails(id)
         setDetail({
           name: place.name,

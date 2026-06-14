@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 import { GOOGLE_MAPS_API_KEY } from '@/constants/api'
-import type { MapPoint } from '@/types/place'
+import { PlaceSource, type MapPoint } from '@/types/place'
 
 type LatLng = { latitude: number; longitude: number }
 
@@ -24,7 +24,7 @@ export function googlePhotoUrl(photoName: string): string {
 function toMapPoint(place: GooglePlace): MapPoint {
   return {
     id: place.id,
-    source: 'google',
+    source: PlaceSource.Google,
     name: place.displayName?.text ?? 'Ponto turístico',
     category: null,
     imageUrl: place.photos?.[0] ? googlePhotoUrl(place.photos[0].name) : null,

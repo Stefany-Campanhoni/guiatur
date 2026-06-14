@@ -8,7 +8,7 @@ import { PointCard } from '@/components/PointCard'
 import { useLiveLocation } from '@/contexts/location'
 import { fetchPlaces } from '@/services/jsonServer'
 import { fetchNearbyGooglePlaces } from '@/services/placesApi'
-import { placeToMapPoint, type MapPoint, type PlaceSource } from '@/types/place'
+import { placeToMapPoint, PlaceSource, type MapPoint } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
 
 const INITIAL_CENTER = { latitude: -28.6775, longitude: -49.3697 }
@@ -17,8 +17,8 @@ type Filter = 'all' | PlaceSource
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'Todos' },
-  { key: 'local', label: 'Meus pontos' },
-  { key: 'google', label: 'Google' },
+  { key: PlaceSource.Local, label: 'Meus pontos' },
+  { key: PlaceSource.Google, label: 'Google' },
 ]
 
 export default function ExploreScreen() {

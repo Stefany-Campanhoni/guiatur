@@ -11,7 +11,7 @@ import { useLiveLocation } from '@/contexts/location'
 import { useGeofencing } from '@/hooks/useGeofencing'
 import { fetchPlaces } from '@/services/jsonServer'
 import { fetchNearbyGooglePlaces } from '@/services/placesApi'
-import { CATEGORY_LABELS, placeToMapPoint, type MapPoint } from '@/types/place'
+import { CATEGORY_LABELS, PlaceSource, placeToMapPoint, type MapPoint } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
 
 const INITIAL_REGION = {
@@ -66,7 +66,7 @@ export default function MapScreen() {
   }
 
   const activePoints = points.filter((point) => point.isActive)
-  const localPoints = activePoints.filter((point) => point.source === 'local')
+  const localPoints = activePoints.filter((point) => point.source === PlaceSource.Local)
   const nearbyDistance = nearbyPoint && coords ? haversineDistance(coords, nearbyPoint) : null
 
   return (
@@ -78,7 +78,7 @@ export default function MapScreen() {
             coordinate={{ latitude: point.latitude, longitude: point.longitude }}
             title={point.name}
             description={point.category ? CATEGORY_LABELS[point.category] : 'Google Places'}
-            pinColor={point.source === 'local' ? COLORS.rose : COLORS.periwinkle}
+            pinColor={point.source === PlaceSource.Local ? COLORS.rose : COLORS.periwinkle}
             onCalloutPress={() => router.push({ pathname: '/place/[id]', params: { id: point.id, source: point.source } })}
           />
         ))}

@@ -10,58 +10,97 @@ import { ErrorMessage } from '@/components/ErrorMessage'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { useLiveLocation } from '@/contexts/location'
 import { fetchPlace } from '@/services/jsonServer'
-import { type Place } from '@/types/place'
+import { fetchGooglePlaceDetails } from '@/services/placesApi'
+import { type PlaceCategory } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
 
+type DetailView = {
+  name: string
+  description: string
+  imageUrl: string | null
+  category: PlaceCategory | null
+  rating: number | null
+  latitude: number
+  longitude: number
+}
+
 export default function PlaceDetailsScreen() {
-  const { id } = useLocalSearchParams<{ id: string; source: string }>()
+  const { id, source } = useLocalSearchParams<{ id: string; source: string }>()
   const { coords } = useLiveLocation()
-  const [place, setPlace] = useState<Place | null>(null)
+  const [detail, setDetail] = useState<DetailView | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadPlace = useCallback(async () => {
+  const loadDetail = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
-      setPlace(await fetchPlace(id))
+      if (source === 'google') {
+        const place = await fetchGooglePlaceDetails(id)
+        setDetail({
+          name: place.name,
+          description: place.description,
+          imageUrl: place.imageUrl,
+          category: null,
+          rating: place.rating,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        })
+      } else {
+        const place = await fetchPlace(id)
+        setDetail({
+          name: place.name,
+          description: place.description,
+          imageUrl: place.imageUrl,
+          category: place.category,
+          rating: null,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        })
+      }
     } catch {
       setError('Não foi possível carregar este ponto.')
     } finally {
       setIsLoading(false)
     }
-  }, [id])
+  }, [id, source])
 
   useEffect(() => {
-    loadPlace()
-  }, [loadPlace])
+    loadDetail()
+  }, [loadDetail])
 
   if (isLoading) {
     return <LoadingOverlay message="Carregando ponto..." />
   }
 
-  if (error || !place) {
-    return <ErrorMessage message={error ?? 'Ponto não encontrado.'} onRetry={loadPlace} />
+  if (error || !detail) {
+    return <ErrorMessage message={error ?? 'Ponto não encontrado.'} onRetry={loadDetail} />
   }
 
-  const distanceMeters = coords ? haversineDistance(coords, place) : null
+  const distanceMeters = coords ? haversineDistance(coords, detail) : null
 
   const openDirections = () => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`
-    Linking.openURL(url)
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${detail.latitude},${detail.longitude}`)
   }
 
   return (
     <ScrollView className="flex-1 bg-rose-subtle" contentContainerStyle={{ padding: 20 }}>
-      <Image source={{ uri: place.imageUrl }} style={styles.hero} contentFit="cover" transition={200} />
+      {detail.imageUrl ? (
+        <Image source={{ uri: detail.imageUrl }} style={styles.hero} contentFit="cover" transition={200} />
+      ) : null}
 
-      <View className="mt-4 flex-row gap-2">
-        <CategoryBadge category={place.category} />
+      <View className="mt-4 flex-row items-center gap-2">
+        <CategoryBadge category={detail.category} />
         {distanceMeters !== null ? <DistanceBadge meters={distanceMeters} /> : null}
+        {detail.rating !== null ? (
+          <View className="self-start rounded-full bg-sand-light px-3 py-1">
+            <Text className="font-medium text-xs text-rose-dark">⭐ {detail.rating.toFixed(1)}</Text>
+          </View>
+        ) : null}
       </View>
 
-      <Text className="mt-3 font-bold text-2xl text-ink">{place.name}</Text>
-      <Text className="mt-2 font-sans text-base leading-6 text-ink-muted">{place.description}</Text>
+      <Text className="mt-3 font-bold text-2xl text-ink">{detail.name}</Text>
+      <Text className="mt-2 font-sans text-base leading-6 text-ink-muted">{detail.description}</Text>
 
       <Text className="mb-2 mt-6 font-medium text-xs uppercase text-ink-muted">Localização</Text>
       <View style={styles.mapWrapper}>
@@ -69,14 +108,9 @@ export default function PlaceDetailsScreen() {
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           pointerEvents="none"
-          initialRegion={{
-            latitude: place.latitude,
-            longitude: place.longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-          }}
+          initialRegion={{ latitude: detail.latitude, longitude: detail.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005 }}
         >
-          <Marker coordinate={{ latitude: place.latitude, longitude: place.longitude }} title={place.name} />
+          <Marker coordinate={{ latitude: detail.latitude, longitude: detail.longitude }} title={detail.name} />
         </MapView>
       </View>
 

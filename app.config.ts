@@ -4,22 +4,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: config.name ?? 'guiatur',
   slug: config.slug ?? 'guiatur',
-  android: {
-    ...config.android,
-    config: {
-      ...config.android?.config,
-      googleMaps: { apiKey: process.env.GOOGLE_MAPS_API_KEY },
-    },
-  },
-  plugins: [
-    ...(config.plugins ?? []),
-    [
-      'expo-maps',
-      {
-        requestLocationPermission: true,
-        locationPermission: 'Permitir que o $(PRODUCT_NAME) use sua localização',
-      },
-    ],
-    ['expo-build-properties', { android: { minSdkVersion: 26 } }],
-  ] as ExpoConfig['plugins'],
+  plugins: (config.plugins ?? []).map((plugin) =>
+    Array.isArray(plugin) && plugin[0] === 'react-native-maps'
+      ? ['react-native-maps', { androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY }]
+      : plugin,
+  ) as ExpoConfig['plugins'],
 })

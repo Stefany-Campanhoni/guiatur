@@ -1,8 +1,8 @@
-import { GoogleMaps } from 'expo-maps'
 import { Image } from 'expo-image'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
 import { CategoryBadge } from '@/components/CategoryBadge'
 import { DistanceBadge } from '@/components/DistanceBadge'
@@ -65,24 +65,19 @@ export default function PlaceDetailsScreen() {
 
       <Text className="mb-2 mt-6 font-medium text-xs uppercase text-ink-muted">Localização</Text>
       <View style={styles.mapWrapper}>
-        <GoogleMaps.View
+        <MapView
+          provider={PROVIDER_GOOGLE}
           style={styles.map}
-          cameraPosition={{ coordinates: { latitude: place.latitude, longitude: place.longitude }, zoom: 15 }}
-          markers={[
-            {
-              id: place.id,
-              coordinates: { latitude: place.latitude, longitude: place.longitude },
-              title: place.name,
-            },
-          ]}
-          uiSettings={{
-            scrollGesturesEnabled: false,
-            zoomGesturesEnabled: false,
-            rotationGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            myLocationButtonEnabled: false,
+          pointerEvents="none"
+          initialRegion={{
+            latitude: place.latitude,
+            longitude: place.longitude,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
           }}
-        />
+        >
+          <Marker coordinate={{ latitude: place.latitude, longitude: place.longitude }} title={place.name} />
+        </MapView>
       </View>
 
       <Pressable className="mt-5 items-center rounded-2xl bg-rose px-5 py-4 active:bg-rose-dark" onPress={openDirections}>

@@ -1,18 +1,24 @@
-import { GoogleMaps } from 'expo-maps'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { ProximityModal } from '@/components/ProximityModal'
+import { COLORS } from '@/constants/theme'
 import { useLiveLocation } from '@/contexts/location'
 import { useGeofencing } from '@/hooks/useGeofencing'
 import { fetchPlaces } from '@/services/jsonServer'
 import { CATEGORY_LABELS, placeToMapPoint, type MapPoint } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
 
-const CRICIUMA = { latitude: -28.6775, longitude: -49.3697 }
+const INITIAL_REGION = {
+  latitude: -28.6775,
+  longitude: -49.3697,
+  latitudeDelta: 0.02,
+  longitudeDelta: 0.02,
+}
 
 export default function MapScreen() {
   const router = useRouter()
@@ -55,31 +61,28 @@ export default function MapScreen() {
   const activePoints = points.filter((point) => point.isActive)
   const nearbyDistance = nearbyPoint && coords ? haversineDistance(coords, nearbyPoint) : null
 
-  const markers = activePoints.map((point) => ({
-    id: point.id,
-    coordinates: { latitude: point.latitude, longitude: point.longitude },
-    title: point.name,
-    snippet: point.category ? CATEGORY_LABELS[point.category] : undefined,
-  }))
-
-  const circles = activePoints.map((point) => ({
-    id: point.id,
-    center: { latitude: point.latitude, longitude: point.longitude },
-    radius: point.radiusMeters,
-    color: 'rgba(232,160,180,0.2)',
-    lineColor: 'rgba(196,122,151,0.6)',
-    lineWidth: 2,
-  }))
-
   return (
     <View style={styles.container}>
-      <GoogleMaps.View
-        style={styles.map}
-        cameraPosition={{ coordinates: coords ?? CRICIUMA, zoom: 13 }}
-        markers={markers}
-        circles={circles}
-        properties={{ isMyLocationEnabled: true }}
-      />
+      <MapView provider={PROVIDER_GOOGLE} style={styles.map} initialRegion={INITIAL_REGION} showsUserLocation>
+        {activePoints.map((point) => (
+          <Marker
+            key={`marker-${point.id}`}
+            coordinate={{ latitude: point.latitude, longitude: point.longitude }}
+            title={point.name}
+            description={point.category ? CATEGORY_LABELS[point.category] : undefined}
+            pinColor={point.source === 'local' ? COLORS.rose : COLORS.periwinkle}
+          />
+        ))}
+        {activePoints.map((point) => (
+          <Circle
+            key={`circle-${point.id}`}
+            center={{ latitude: point.latitude, longitude: point.longitude }}
+            radius={point.radiusMeters}
+            strokeColor="rgba(196,122,151,0.6)"
+            fillColor="rgba(232,160,180,0.2)"
+          />
+        ))}
+      </MapView>
 
       <ProximityModal
         point={nearbyPoint}

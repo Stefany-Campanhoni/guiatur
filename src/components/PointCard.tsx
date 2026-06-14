@@ -22,7 +22,7 @@ export function PointCard({ point, onPress, distanceMeters = null }: PointCardPr
       ) : null}
       <View className="p-4">
         <View className="flex-row gap-2">
-          <CategoryBadge category={point.category} />
+          <CategoryBadge category={point.category} customCategory={point.customCategory} />
           {distanceMeters !== null ? <DistanceBadge meters={distanceMeters} /> : null}
         </View>
         <Text className="mt-2 font-bold text-lg text-ink">{point.name}</Text>

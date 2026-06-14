@@ -30,7 +30,7 @@ export function ProximityModal({ point, distanceMeters, onDismiss, onSeeDetails 
               ) : null}
               <Text className="mt-3 font-bold text-xl text-ink">{point.name}</Text>
               <View className="mt-2 flex-row gap-2">
-                <CategoryBadge category={point.category} />
+                <CategoryBadge category={point.category} customCategory={point.customCategory} />
                 {distanceMeters !== null ? <DistanceBadge meters={distanceMeters} /> : null}
               </View>
               <Pressable

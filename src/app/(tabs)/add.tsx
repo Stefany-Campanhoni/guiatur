@@ -4,8 +4,11 @@ import * as Location from 'expo-location'
 import { useRouter } from 'expo-router'
 import { Controller, useForm } from 'react-hook-form'
 import { Alert, Pressable, ScrollView, Switch, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { ColorField, PIN_COLORS } from '@/components/ColorField'
 import { FormInput } from '@/components/FormInput'
+import { ImageField } from '@/components/ImageField'
 import { COLORS } from '@/constants/theme'
 import { useLiveLocation } from '@/contexts/location'
 import { placeSchema, type PlaceFormValues } from '@/schemas/placeSchema'
@@ -16,24 +19,29 @@ const DEFAULT_VALUES: PlaceFormValues = {
   name: '',
   description: '',
   category: 'museum',
+  customCategory: '',
   radiusMeters: '',
   imageUrl: '',
-  pinColor: '#E8A0B4',
+  pinColor: PIN_COLORS[0],
   isActive: true,
 }
 
 export default function AddScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
   const { coords } = useLiveLocation()
   const {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PlaceFormValues>({
     resolver: zodResolver(placeSchema),
     defaultValues: DEFAULT_VALUES,
   })
+
+  const category = watch('category')
 
   const onSubmit = async (values: PlaceFormValues) => {
     let position = coords
@@ -47,8 +55,10 @@ export default function AddScreen() {
         name: values.name,
         description: values.description,
         category: values.category,
+        customCategory: values.category === 'other' ? values.customCategory?.trim() : undefined,
         radiusMeters: Number(values.radiusMeters),
         imageUrl: values.imageUrl,
+        pinColor: values.pinColor,
         isActive: values.isActive,
         latitude: position.latitude,
         longitude: position.longitude,
@@ -67,7 +77,7 @@ export default function AddScreen() {
   return (
     <ScrollView
       className="flex-1 bg-rose-subtle"
-      contentContainerStyle={{ padding: 24 }}
+      contentContainerStyle={{ padding: 24, paddingTop: insets.top + 16 }}
       keyboardShouldPersistTaps="handled"
     >
       <Text className="mb-1 font-bold text-2xl text-rose-dark">Adicionar ponto</Text>
@@ -77,14 +87,7 @@ export default function AddScreen() {
         control={control}
         name="name"
         render={({ field: { onChange, onBlur, value } }) => (
-          <FormInput
-            label="Nome"
-            placeholder="Ex: Praça Central"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            error={errors.name?.message}
-          />
+          <FormInput label="Nome" required placeholder="Ex: Praça Central" value={value} onChangeText={onChange} onBlur={onBlur} error={errors.name?.message} />
         )}
       />
 
@@ -94,6 +97,7 @@ export default function AddScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <FormInput
             label="Descrição histórica"
+            required
             placeholder="Conte a história deste lugar..."
             value={value}
             onChangeText={onChange}
@@ -107,15 +111,17 @@ export default function AddScreen() {
       />
 
       <View className="mb-4">
-        <Text className="mb-1 font-medium text-sm text-ink">Categoria</Text>
+        <Text className="mb-1 font-medium text-sm text-ink">
+          Categoria<Text className="text-error"> *</Text>
+        </Text>
         <View className="overflow-hidden rounded-2xl border border-sand bg-white">
           <Controller
             control={control}
             name="category"
             render={({ field: { onChange, value } }) => (
               <Picker selectedValue={value} onValueChange={onChange}>
-                {PLACE_CATEGORIES.map((category) => (
-                  <Picker.Item key={category} label={CATEGORY_LABELS[category]} value={category} />
+                {PLACE_CATEGORIES.map((option) => (
+                  <Picker.Item key={option} label={CATEGORY_LABELS[option]} value={option} />
                 ))}
               </Picker>
             )}
@@ -123,13 +129,32 @@ export default function AddScreen() {
         </View>
       </View>
 
+      {category === 'other' ? (
+        <Controller
+          control={control}
+          name="customCategory"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <FormInput
+              label="Categoria personalizada"
+              required
+              placeholder="Ex: Mirante"
+              value={value ?? ''}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={errors.customCategory?.message}
+            />
+          )}
+        />
+      ) : null}
+
       <Controller
         control={control}
         name="radiusMeters"
         render={({ field: { onChange, onBlur, value } }) => (
           <FormInput
             label="Raio do geofence (metros)"
-            placeholder="50 a 1000"
+            required
+            placeholder="Ex: 200 — entre 50 e 1000"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -143,17 +168,14 @@ export default function AddScreen() {
         control={control}
         name="imageUrl"
         render={({ field: { onChange, onBlur, value } }) => (
-          <FormInput
-            label="URL da imagem"
-            placeholder="https://..."
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            error={errors.imageUrl?.message}
-            autoCapitalize="none"
-            keyboardType="url"
-          />
+          <ImageField label="Imagem" required value={value} onChange={onChange} onBlur={onBlur} error={errors.imageUrl?.message} />
         )}
+      />
+
+      <Controller
+        control={control}
+        name="pinColor"
+        render={({ field: { onChange, value } }) => <ColorField label="Cor do marcador" value={value} onChange={onChange} />}
       />
 
       <Controller
@@ -167,11 +189,7 @@ export default function AddScreen() {
         )}
       />
 
-      <Pressable
-        className="items-center rounded-2xl bg-rose px-5 py-4 active:bg-rose-dark"
-        disabled={isSubmitting}
-        onPress={handleSubmit(onSubmit)}
-      >
+      <Pressable className="items-center rounded-2xl bg-rose px-5 py-4 active:bg-rose-dark" disabled={isSubmitting} onPress={handleSubmit(onSubmit)}>
         <Text className="font-bold text-base text-white">{isSubmitting ? 'Salvando...' : 'Salvar ponto'}</Text>
       </Pressable>
     </ScrollView>

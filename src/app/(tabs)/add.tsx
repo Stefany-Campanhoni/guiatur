@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Picker } from '@react-native-picker/picker'
 import * as Location from 'expo-location'
 import { useRouter } from 'expo-router'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Alert, Pressable, ScrollView, Switch, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -9,8 +10,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ColorField, PIN_COLORS } from '@/components/ColorField'
 import { FormInput } from '@/components/FormInput'
 import { ImageField } from '@/components/ImageField'
+import { LocationPicker } from '@/components/LocationPicker'
 import { COLORS } from '@/constants/theme'
-import { useLiveLocation } from '@/contexts/location'
+import { useLiveLocation, type Coords } from '@/contexts/location'
 import { placeSchema, type PlaceFormValues } from '@/schemas/placeSchema'
 import { createPlace } from '@/services/jsonServer'
 import { CATEGORY_LABELS, PLACE_CATEGORIES } from '@/types/place'
@@ -42,9 +44,18 @@ export default function AddScreen() {
   })
 
   const category = watch('category')
+  const [origin, setOrigin] = useState<Coords | null>(null)
+  const [pinCoord, setPinCoord] = useState<Coords | null>(null)
+
+  useEffect(() => {
+    if (coords && !origin) {
+      setOrigin(coords)
+      setPinCoord(coords)
+    }
+  }, [coords, origin])
 
   const onSubmit = async (values: PlaceFormValues) => {
-    let position = coords
+    let position = pinCoord ?? coords
     if (!position) {
       const current = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High })
       position = { latitude: current.coords.latitude, longitude: current.coords.longitude }
@@ -81,7 +92,7 @@ export default function AddScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <Text className="mb-1 font-bold text-2xl text-rose-dark">Adicionar ponto</Text>
-      <Text className="mb-5 font-sans text-sm text-ink-muted">O ponto é salvo na sua localização atual.</Text>
+      <Text className="mb-5 font-sans text-sm text-ink-muted">Ajuste o pino no mapa para definir o local do ponto.</Text>
 
       <Controller
         control={control}
@@ -163,6 +174,8 @@ export default function AddScreen() {
           />
         )}
       />
+
+      <LocationPicker label="Localização do ponto" origin={origin} value={pinCoord} onChange={setPinCoord} />
 
       <Controller
         control={control}

@@ -1,29 +1,47 @@
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
-import { FlatList, Text, View } from 'react-native'
+import { FlatList, Pressable, Text, View } from 'react-native'
 
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { PointCard } from '@/components/PointCard'
 import { useLiveLocation } from '@/contexts/location'
 import { fetchPlaces } from '@/services/jsonServer'
-import { placeToMapPoint, type MapPoint } from '@/types/place'
+import { fetchNearbyGooglePlaces } from '@/services/placesApi'
+import { placeToMapPoint, type MapPoint, type PlaceSource } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
+
+const INITIAL_CENTER = { latitude: -28.6775, longitude: -49.3697 }
+
+type Filter = 'all' | PlaceSource
+
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: 'all', label: 'Todos' },
+  { key: 'local', label: 'Meus pontos' },
+  { key: 'google', label: 'Google' },
+]
 
 export default function ExploreScreen() {
   const router = useRouter()
   const { coords } = useLiveLocation()
+  const coordsRef = useRef(coords)
+  coordsRef.current = coords
   const [points, setPoints] = useState<MapPoint[]>([])
+  const [filter, setFilter] = useState<Filter>('all')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const hasLoaded = useRef(false)
 
-  const loadPlaces = useCallback(async (withSpinner: boolean) => {
+  const loadPoints = useCallback(async (withSpinner: boolean) => {
     if (withSpinner) setIsLoading(true)
     setError(null)
     try {
-      const places = await fetchPlaces()
-      setPoints(places.map(placeToMapPoint))
+      const center = coordsRef.current ?? INITIAL_CENTER
+      const [local, google] = await Promise.all([
+        fetchPlaces().then((places) => places.map(placeToMapPoint)),
+        fetchNearbyGooglePlaces(center),
+      ])
+      setPoints([...local, ...google])
     } catch {
       setError('Não foi possível carregar os pontos. Verifique se o servidor está rodando.')
     } finally {
@@ -33,9 +51,9 @@ export default function ExploreScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadPlaces(!hasLoaded.current)
+      loadPoints(!hasLoaded.current)
       hasLoaded.current = true
-    }, [loadPlaces]),
+    }, [loadPoints]),
   )
 
   if (isLoading) {
@@ -43,21 +61,34 @@ export default function ExploreScreen() {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={() => loadPlaces(true)} />
+    return <ErrorMessage message={error} onRetry={() => loadPoints(true)} />
   }
+
+  const visiblePoints = filter === 'all' ? points : points.filter((point) => point.source === filter)
 
   return (
     <View className="flex-1 bg-rose-subtle">
       <FlatList
-        data={points}
-        keyExtractor={(item) => item.id}
+        data={visiblePoints}
+        keyExtractor={(item) => `${item.source}-${item.id}`}
         contentContainerStyle={{ padding: 24 }}
         ListHeaderComponent={
           <View className="mb-4">
             <Text className="font-bold text-2xl text-rose-dark">Explorar</Text>
-            <Text className="mt-1 font-sans text-sm text-ink-muted">
-              {points.length} {points.length === 1 ? 'ponto turístico' : 'pontos turísticos'}
-            </Text>
+            <View className="mt-3 flex-row gap-2">
+              {FILTERS.map((option) => {
+                const active = option.key === filter
+                return (
+                  <Pressable
+                    key={option.key}
+                    className={`rounded-full px-4 py-2 ${active ? 'bg-rose' : 'border border-sand bg-white'}`}
+                    onPress={() => setFilter(option.key)}
+                  >
+                    <Text className={`font-medium text-sm ${active ? 'text-white' : 'text-ink-muted'}`}>{option.label}</Text>
+                  </Pressable>
+                )
+              })}
+            </View>
           </View>
         }
         renderItem={({ item }) => (

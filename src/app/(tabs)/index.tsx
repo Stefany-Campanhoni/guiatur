@@ -10,6 +10,7 @@ import { COLORS } from '@/constants/theme'
 import { useLiveLocation } from '@/contexts/location'
 import { useGeofencing } from '@/hooks/useGeofencing'
 import { fetchPlaces } from '@/services/jsonServer'
+import { fetchNearbyGooglePlaces } from '@/services/placesApi'
 import { CATEGORY_LABELS, placeToMapPoint, type MapPoint } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
 
@@ -23,17 +24,23 @@ const INITIAL_REGION = {
 export default function MapScreen() {
   const router = useRouter()
   const { coords } = useLiveLocation()
+  const coordsRef = useRef(coords)
+  coordsRef.current = coords
   const [points, setPoints] = useState<MapPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const hasLoaded = useRef(false)
 
-  const loadPlaces = useCallback(async (withSpinner: boolean) => {
+  const loadPoints = useCallback(async (withSpinner: boolean) => {
     if (withSpinner) setIsLoading(true)
     setError(null)
     try {
-      const places = await fetchPlaces()
-      setPoints(places.map(placeToMapPoint))
+      const center = coordsRef.current ?? INITIAL_REGION
+      const [local, google] = await Promise.all([
+        fetchPlaces().then((places) => places.map(placeToMapPoint)),
+        fetchNearbyGooglePlaces(center),
+      ])
+      setPoints([...local, ...google])
     } catch {
       setError('Não foi possível carregar os pontos.')
     } finally {
@@ -43,9 +50,9 @@ export default function MapScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadPlaces(!hasLoaded.current)
+      loadPoints(!hasLoaded.current)
       hasLoaded.current = true
-    }, [loadPlaces]),
+    }, [loadPoints]),
   )
 
   const { nearbyPoint, dismiss } = useGeofencing(points, coords)
@@ -55,10 +62,11 @@ export default function MapScreen() {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={() => loadPlaces(true)} />
+    return <ErrorMessage message={error} onRetry={() => loadPoints(true)} />
   }
 
   const activePoints = points.filter((point) => point.isActive)
+  const localPoints = activePoints.filter((point) => point.source === 'local')
   const nearbyDistance = nearbyPoint && coords ? haversineDistance(coords, nearbyPoint) : null
 
   return (
@@ -66,14 +74,15 @@ export default function MapScreen() {
       <MapView provider={PROVIDER_GOOGLE} style={styles.map} initialRegion={INITIAL_REGION} showsUserLocation>
         {activePoints.map((point) => (
           <Marker
-            key={`marker-${point.id}`}
+            key={`marker-${point.source}-${point.id}`}
             coordinate={{ latitude: point.latitude, longitude: point.longitude }}
             title={point.name}
-            description={point.category ? CATEGORY_LABELS[point.category] : undefined}
+            description={point.category ? CATEGORY_LABELS[point.category] : 'Google Places'}
             pinColor={point.source === 'local' ? COLORS.rose : COLORS.periwinkle}
+            onCalloutPress={() => router.push({ pathname: '/place/[id]', params: { id: point.id, source: point.source } })}
           />
         ))}
-        {activePoints.map((point) => (
+        {localPoints.map((point) => (
           <Circle
             key={`circle-${point.id}`}
             center={{ latitude: point.latitude, longitude: point.longitude }}

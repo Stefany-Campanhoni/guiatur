@@ -78,7 +78,7 @@ export default function AddScreen() {
       })
       reset(DEFAULT_VALUES)
       Alert.alert('Pronto!', 'Ponto cadastrado com sucesso.', [
-        { text: 'Ver no mapa', onPress: () => router.push('/(tabs)') },
+        { text: 'Ver no mapa', onPress: () => router.push('/') },
         { text: 'OK' },
       ])
     } catch {

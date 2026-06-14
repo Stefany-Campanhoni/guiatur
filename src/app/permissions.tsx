@@ -7,7 +7,7 @@ export default function PermissionsScreen() {
   const { isGranted, permission, requestPermission } = useLocationPermission()
 
   if (isGranted) {
-    return <Redirect href="/(tabs)" />
+    return <Redirect href="/" />
   }
 
   const permissionWasDenied = permission?.status === 'denied'

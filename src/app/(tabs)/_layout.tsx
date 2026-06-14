@@ -15,9 +15,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: COLORS.roseSubtle },
-        headerTintColor: COLORS.roseDark,
-        headerTitleStyle: { fontFamily: 'Nunito_700Bold' },
+        headerShown: false,
         tabBarActiveTintColor: COLORS.roseDark,
         tabBarInactiveTintColor: COLORS.inkMuted,
         tabBarLabelStyle: { fontFamily: 'Nunito_600SemiBold' },

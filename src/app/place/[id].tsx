@@ -1,8 +1,9 @@
 import { Image } from 'expo-image'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { CategoryBadge } from '@/components/CategoryBadge'
 import { DistanceBadge } from '@/components/DistanceBadge'
@@ -19,12 +20,15 @@ type DetailView = {
   description: string
   imageUrl: string | null
   category: PlaceCategory | null
+  customCategory: string | null
   rating: number | null
   latitude: number
   longitude: number
 }
 
 export default function PlaceDetailsScreen() {
+  const router = useRouter()
+  const insets = useSafeAreaInsets()
   const { id, source } = useLocalSearchParams<{ id: string; source: string }>()
   const { coords } = useLiveLocation()
   const [detail, setDetail] = useState<DetailView | null>(null)
@@ -42,6 +46,7 @@ export default function PlaceDetailsScreen() {
           description: place.description,
           imageUrl: place.imageUrl,
           category: null,
+          customCategory: null,
           rating: place.rating,
           latitude: place.latitude,
           longitude: place.longitude,
@@ -53,6 +58,7 @@ export default function PlaceDetailsScreen() {
           description: place.description,
           imageUrl: place.imageUrl,
           category: place.category,
+          customCategory: place.customCategory ?? null,
           rating: null,
           latitude: place.latitude,
           longitude: place.longitude,
@@ -84,13 +90,17 @@ export default function PlaceDetailsScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-rose-subtle" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView className="flex-1 bg-rose-subtle" contentContainerStyle={{ padding: 20, paddingTop: insets.top + 12 }}>
+      <Pressable className="mb-3 self-start rounded-full px-3 py-2 active:opacity-70" onPress={() => router.back()}>
+        <Text className="font-medium text-base text-rose-dark">← Voltar</Text>
+      </Pressable>
+
       {detail.imageUrl ? (
         <Image source={{ uri: detail.imageUrl }} style={styles.hero} contentFit="cover" transition={200} />
       ) : null}
 
       <View className="mt-4 flex-row items-center gap-2">
-        <CategoryBadge category={detail.category} />
+        <CategoryBadge category={detail.category} customCategory={detail.customCategory} />
         {distanceMeters !== null ? <DistanceBadge meters={distanceMeters} /> : null}
         {detail.rating !== null ? (
           <View className="self-start rounded-full bg-sand-light px-3 py-1">

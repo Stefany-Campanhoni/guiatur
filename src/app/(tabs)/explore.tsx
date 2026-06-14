@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
@@ -23,6 +24,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export default function ExploreScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
   const { coords } = useLiveLocation()
   const coordsRef = useRef(coords)
   coordsRef.current = coords
@@ -71,7 +73,7 @@ export default function ExploreScreen() {
       <FlatList
         data={visiblePoints}
         keyExtractor={(item) => `${item.source}-${item.id}`}
-        contentContainerStyle={{ padding: 24 }}
+        contentContainerStyle={{ padding: 24, paddingTop: insets.top + 16 }}
         ListHeaderComponent={
           <View className="mb-4">
             <Text className="font-bold text-2xl text-rose-dark">Explorar</Text>

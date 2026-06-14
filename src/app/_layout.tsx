@@ -39,7 +39,7 @@ export default function RootLayout() {
           >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="permissions" options={{ headerShown: false }} />
-            <Stack.Screen name="place/[id]" options={{ title: 'Detalhes' }} />
+            <Stack.Screen name="place/[id]" options={{ headerShown: false }} />
           </Stack>
         </LiveLocationProvider>
       </LocationPermissionProvider>

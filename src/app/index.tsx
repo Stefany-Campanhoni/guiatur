@@ -1,5 +1,5 @@
-import { useFocusEffect, useRouter } from 'expo-router'
-import { useCallback, useRef, useState } from 'react'
+import { useRouter } from 'expo-router'
+import { useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,9 +10,9 @@ import { ProximityModal } from '@/components/ProximityModal'
 import { COLORS } from '@/constants/theme'
 import { useLiveLocation } from '@/contexts/location'
 import { useGeofencing } from '@/hooks/useGeofencing'
-import { fetchPlaces } from '@/services/jsonServer'
-import { fetchNearbyGooglePlaces, searchGooglePlaces } from '@/services/placesApi'
-import { categoryLabel, placeToMapPoint, PlaceSource, type MapPoint } from '@/types/place'
+import { useMapPoints } from '@/hooks/usePlaces'
+import { searchGooglePlaces } from '@/services/placesApi'
+import { categoryLabel, PlaceSource, type MapPoint } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
 
 const CRICIUMA = { latitude: -28.6775, longitude: -49.3697 }
@@ -22,40 +22,11 @@ export default function MapScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { coords } = useLiveLocation()
-  const coordsRef = useRef(coords)
-  coordsRef.current = coords
   const mapRef = useRef<MapView>(null)
-  const [points, setPoints] = useState<MapPoint[]>([])
+  const { points, isLoading, isError, refetch } = useMapPoints(coords)
   const [searchResults, setSearchResults] = useState<MapPoint[]>([])
   const [query, setQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const hasLoaded = useRef(false)
-
-  const loadPoints = useCallback(async (withSpinner: boolean) => {
-    if (withSpinner) setIsLoading(true)
-    setError(null)
-    try {
-      const center = coordsRef.current ?? CRICIUMA
-      const [local, google] = await Promise.all([
-        fetchPlaces().then((places) => places.map(placeToMapPoint)),
-        fetchNearbyGooglePlaces(center),
-      ])
-      setPoints([...local, ...google])
-    } catch {
-      setError('Não foi possível carregar os pontos.')
-    } finally {
-      if (withSpinner) setIsLoading(false)
-    }
-  }, [])
-
-  useFocusEffect(
-    useCallback(() => {
-      loadPoints(!hasLoaded.current)
-      hasLoaded.current = true
-    }, [loadPoints]),
-  )
 
   const onSearch = async () => {
     if (!query.trim()) {
@@ -63,7 +34,7 @@ export default function MapScreen() {
       return
     }
     setIsSearching(true)
-    const results = await searchGooglePlaces(query, coordsRef.current ?? CRICIUMA)
+    const results = await searchGooglePlaces(query, coords ?? CRICIUMA)
     setSearchResults(results)
     setIsSearching(false)
     const first = results[0]
@@ -81,8 +52,8 @@ export default function MapScreen() {
     return <LoadingOverlay message="Carregando mapa..." />
   }
 
-  if (error) {
-    return <ErrorMessage message={error} onRetry={() => loadPoints(true)} />
+  if (isError) {
+    return <ErrorMessage message="Não foi possível carregar os pontos." onRetry={refetch} />
   }
 
   const activePoints = points.filter((point) => point.isActive)

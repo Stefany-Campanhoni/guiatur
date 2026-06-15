@@ -3,6 +3,7 @@ import './global.css'
 import { Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold, useFonts } from '@expo-google-fonts/nunito'
 import AntDesign from '@expo/vector-icons/AntDesign'
 import Entypo from '@expo/vector-icons/Entypo'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Tabs } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { ActivityIndicator, View } from 'react-native'
@@ -10,6 +11,7 @@ import { ActivityIndicator, View } from 'react-native'
 import { COLORS } from '@/constants/theme'
 import { LiveLocationProvider } from '@/contexts/location'
 import { LocationPermissionProvider, useLocationPermission } from '@/contexts/location-permission'
+import { queryClient } from '@/lib/queryClient'
 
 function RootTabs() {
   const { isGranted } = useLocationPermission()
@@ -60,13 +62,13 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <StatusBar style="dark" />
       <LocationPermissionProvider>
         <LiveLocationProvider>
           <RootTabs />
         </LiveLocationProvider>
       </LocationPermissionProvider>
-    </>
+    </QueryClientProvider>
   )
 }

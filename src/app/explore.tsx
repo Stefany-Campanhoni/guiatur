@@ -1,5 +1,5 @@
-import { useFocusEffect, useRouter } from 'expo-router'
-import { useCallback, useRef, useState } from 'react'
+import { useRouter } from 'expo-router'
+import { useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -7,12 +7,9 @@ import { ErrorMessage } from '@/components/ErrorMessage'
 import { LoadingOverlay } from '@/components/LoadingOverlay'
 import { PointCard } from '@/components/PointCard'
 import { useLiveLocation } from '@/contexts/location'
-import { fetchPlaces } from '@/services/jsonServer'
-import { fetchNearbyGooglePlaces } from '@/services/placesApi'
-import { placeToMapPoint, PlaceSource, type MapPoint } from '@/types/place'
+import { useMapPoints } from '@/hooks/usePlaces'
+import { PlaceSource } from '@/types/place'
 import { haversineDistance } from '@/utils/haversine'
-
-const INITIAL_CENTER = { latitude: -28.6775, longitude: -49.3697 }
 
 type Filter = 'all' | PlaceSource
 
@@ -26,44 +23,15 @@ export default function ExploreScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { coords } = useLiveLocation()
-  const coordsRef = useRef(coords)
-  coordsRef.current = coords
-  const [points, setPoints] = useState<MapPoint[]>([])
+  const { points, isLoading, isError, refetch } = useMapPoints(coords)
   const [filter, setFilter] = useState<Filter>('all')
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const hasLoaded = useRef(false)
-
-  const loadPoints = useCallback(async (withSpinner: boolean) => {
-    if (withSpinner) setIsLoading(true)
-    setError(null)
-    try {
-      const center = coordsRef.current ?? INITIAL_CENTER
-      const [local, google] = await Promise.all([
-        fetchPlaces().then((places) => places.map(placeToMapPoint)),
-        fetchNearbyGooglePlaces(center),
-      ])
-      setPoints([...local, ...google])
-    } catch {
-      setError('Não foi possível carregar os pontos. Verifique se o servidor está rodando.')
-    } finally {
-      if (withSpinner) setIsLoading(false)
-    }
-  }, [])
-
-  useFocusEffect(
-    useCallback(() => {
-      loadPoints(!hasLoaded.current)
-      hasLoaded.current = true
-    }, [loadPoints]),
-  )
 
   if (isLoading) {
     return <LoadingOverlay message="Carregando pontos..." />
   }
 
-  if (error) {
-    return <ErrorMessage message={error} onRetry={() => loadPoints(true)} />
+  if (isError) {
+    return <ErrorMessage message="Não foi possível carregar os pontos. Verifique se o servidor está rodando." onRetry={refetch} />
   }
 
   const visiblePoints = filter === 'all' ? points : points.filter((point) => point.source === filter)

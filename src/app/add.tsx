@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Picker } from '@react-native-picker/picker'
+import { useQueryClient } from '@tanstack/react-query'
 import * as Location from 'expo-location'
 import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
@@ -13,6 +14,7 @@ import { ImageField } from '@/components/ImageField'
 import { LocationPicker } from '@/components/LocationPicker'
 import { COLORS } from '@/constants/theme'
 import { useLiveLocation, type Coords } from '@/contexts/location'
+import { LOCAL_PLACES_KEY } from '@/hooks/usePlaces'
 import { placeSchema, type PlaceFormValues } from '@/schemas/placeSchema'
 import { createPlace } from '@/services/jsonServer'
 import { CATEGORY_LABELS, PLACE_CATEGORIES } from '@/types/place'
@@ -31,6 +33,7 @@ const DEFAULT_VALUES: PlaceFormValues = {
 export default function AddScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const queryClient = useQueryClient()
   const { coords } = useLiveLocation()
   const {
     control,
@@ -76,6 +79,7 @@ export default function AddScreen() {
         longitude: position.longitude,
         createdAt: new Date().toISOString(),
       })
+      queryClient.invalidateQueries({ queryKey: LOCAL_PLACES_KEY })
       reset(DEFAULT_VALUES)
       Alert.alert('Pronto!', 'Ponto cadastrado com sucesso.', [
         { text: 'Ver no mapa', onPress: () => router.push('/') },

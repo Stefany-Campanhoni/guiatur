@@ -45,7 +45,7 @@
       "imageUrl": "https://picsum.photos/seed/guiatur-monumento/400/300",
       "isActive": true,
       "latitude": -28.6801,
-      "longitude": -49.3720,
+      "longitude": -49.372,
       "createdAt": "2026-06-04T11:45:00.000Z"
     },
     {
@@ -59,6 +59,34 @@
       "latitude": -28.6745,
       "longitude": -49.3738,
       "createdAt": "2026-06-05T16:10:00.000Z"
+    },
+    {
+      "name": "asdasdasdasdasdasdasdasdasd",
+      "description": "asdasdasdasdasdasdasdasdasdsd",
+      "category": "museum",
+      "radiusMeters": 1000,
+      "imageUrl": "https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fmegavilleguaratiba.com.br%2Fgaleria%2Fporquinho-porco-mini-porco_fazendinha-megaville-guaratiba-3%2F&ved=0CBYQjRxqFwoTCJjmj-yhh5UDFQAAAAAdAAAAABAF&opi=89978449",
+      "pinColor": "#E8A0B4",
+      "isActive": true,
+      "latitude": -3.73272,
+      "longitude": -38.5270133,
+      "createdAt": "2026-06-14T17:34:22.965Z",
+      "id": "47bwxYiR6Bw"
+    },
+    {
+      "name": "Coisa doida verde",
+      "description": "Coisa doida verdeeeee",
+      "category": "other",
+      "customCategory": "diferente",
+      "radiusMeters": 50,
+      "imageUrl": "file:///data/user/0/host.exp.exponent/cache/ImagePicker/280998f9-5bcd-49f3-b7c4-e7e6db00950d.jpeg",
+      "pinColor": "#C4C8E4",
+      "isActive": true,
+      "latitude": -3.7329501447681452,
+      "longitude": -38.5271543953865,
+      "createdAt": "2026-06-14T17:37:21.347Z",
+      "id": "cpCGJZHMdQM"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

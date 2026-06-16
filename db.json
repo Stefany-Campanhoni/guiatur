@@ -86,6 +86,19 @@
       "longitude": -38.5271543953865,
       "createdAt": "2026-06-14T17:37:21.347Z",
       "id": "cpCGJZHMdQM"
+    },
+    {
+      "name": "djndssdjkf",
+      "description": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "category": "museum",
+      "radiusMeters": 1000,
+      "imageUrl": "file:///data/user/0/host.exp.exponent/cache/ImagePicker/fb7f7043-0d6e-4ca6-965c-f669524bacf5.jpeg",
+      "pinColor": "#C9A0E8",
+      "isActive": true,
+      "latitude": 48.86731926083197,
+      "longitude": 2.783494256436825,
+      "createdAt": "2026-06-15T23:28:30.563Z",
+      "id": "FAUHjYFa7Pk"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
